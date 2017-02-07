@@ -22,6 +22,10 @@ class CityQuery:
     rtree_properties = index.Property(dimension=3)
     '''Loads inverted index and spatial index into memory and runs lexical
     search and nearest neighbors queries on city data.
+
+    Since CityQuery operates over read-only data, it's conveniently thread safe
+    no matter how many queries from different CityQuery objects you run in
+    parallel.
     '''
     def __init__(self, database, inverted_index_file, spatial_index):
         '''Initialize state by loading relevant indices into memory. Note that
@@ -53,6 +57,11 @@ class CityQuery:
 
         Since we expect both w and m to be relatively small and we store the
         inverted index in memory, this query should quite run quickly.
+
+        We then do some work to search the database for additional information
+        about each of these IDs, which we don't count in the above run time, but
+        which should take O(k) * time to search the database for a key (likely
+        O(1) or O(log number of entries)), where k is the total number of matches.
 
         (What this function doesn't do: ensure that all the words in search_str
         appear in the *same* alternate name or return the alternate name that
